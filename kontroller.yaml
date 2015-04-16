@@ -1,0 +1,6 @@
+template: Hello, %s!
+defaultName: Stranger
+
+kaboomZkConnString: r3k1.kafka.log82.bblabs:2181,r3k2.kafka.log82.bblabs:2181,r3k3.kafka.log82.bblabs:2181/KaBoomDev
+kafkaZkConnString: r3k1.kafka.log82.bblabs:2181,r3k2.kafka.log82.bblabs:2181,r3k3.kafka.log82.bblabs:2181
+#kafkaMetadataBrokerList: r3k1.kafka.log82.bblabs:9092,r3k2.kafka.log82.bblabs:9092,r3k3.kafka.log82.bblabs:9092
