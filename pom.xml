@@ -32,14 +32,27 @@
 			<version>0.8.0</version>
 		</dependency>
 		
+		<!-- Dropwizard -->
+		<dependency>
+			<groupId>io.dropwizard</groupId>
+			<artifactId>dropwizard-assets</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+
 		<!-- kaboom -->
 		<dependency>
 			<groupId>com.blackberry.bdp.kaboom</groupId>
 			<artifactId>kaboom-0.8.0</artifactId>
 			<version>0.8.0</version>
 		</dependency>
-		
-		<!-- Lombok -->
+
+		<dependency>
+			<groupId>com.bazaarvoice.dropwizard</groupId>
+			<artifactId>dropwizard-configurable-assets-bundle</artifactId>
+			<version>0.2.2</version>
+		</dependency>		
+						
+		<!-- Lombok 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -50,7 +63,7 @@
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.9.13</version>
-		</dependency>
+		</dependency>-->
 		
 		<!-- Guava 18.0 specifically, prevents curator from downgrading Guava to 16.0.  There might be better way of doing this  -->
 		<dependency>

@@ -5,7 +5,7 @@
  */
 package com.blackberry.bdp.kontroller.resources;
 
-import com.blackberry.bdp.kontroller.core.KaBoomClients;
+//import com.blackberry.bdp.kontroller.core.KaBoomClients;
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
@@ -36,11 +36,8 @@ public class KaBoomClientResource {
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public KaBoomClients getAll() throws Exception {
-		final List<KaBoomClient> clients = KaBoomClient.getAll(curator, kaboomZkClientPath);
-		for (KaBoomClient client : clients) {
-			LOG.info("Found ourselves a client: {}", client.getNodeInfo().getHostname());
-		}
-		return new KaBoomClients(counter.incrementAndGet(), clients);
+	public List<KaBoomClient> getAll() throws Exception {
+		return KaBoomClient.getAll(curator, kaboomZkClientPath);
+		//return new KaBoomClients(counter.incrementAndGet(), clients);
 	}
 }

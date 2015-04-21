@@ -5,14 +5,17 @@
  */
 package com.blackberry.bdp.kontroller;
 
+import com.bazaarvoice.dropwizard.assets.ConfiguredAssetsBundle;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import com.blackberry.bdp.kontroller.resources.KafkaTopicResource;
 import com.blackberry.bdp.kontroller.resources.KafkaBrokerResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomTopicResource;
+import com.blackberry.bdp.kontroller.resources.KaBoomRunningConfigResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomClientResource;
 import com.blackberry.bdp.kontroller.health.CuratorHealthCheck;
+//import io.dropwizard.assets.AssetsBundle;
 import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +41,7 @@ public class KontrollerApplication extends Application<KontrollerConfiguration>
 
 	@Override
 	public void initialize(Bootstrap<KontrollerConfiguration> bootstrap) {
-		// nothing to do yet
+		bootstrap.addBundle(new ConfiguredAssetsBundle("/assets", "/", "index.html", "static-content"));
 	}
 
 	@Override
@@ -47,30 +50,43 @@ public class KontrollerApplication extends Application<KontrollerConfiguration>
 		kaboomCurator = CuratorBuilder.build(configuration.getKaboomZkConnString(), true);
 		kafkaCurator = CuratorBuilder.build(configuration.getKafkaZkConnString(), true);
 		
-		// Resources	
+		// Publically Accesible Resources	
 		
-		final KafkaBrokerResource kafkaBrokerResource = new KafkaBrokerResource(kafkaCurator, 
+		final KafkaBrokerResource kafkaBrokerResource = new KafkaBrokerResource(
+			 kafkaCurator, 
 			 configuration.getKafkaZkBrokerPath());
-		environment.jersey().register(kafkaBrokerResource);
+		
+		final KafkaTopicResource kafkaTopicResource = new KafkaTopicResource(
+			 configuration.getKafkaSeedBrokers());
 
-		final KafkaTopicResource kafkaTopicResource = new KafkaTopicResource(configuration.getKafkaSeedBrokers());
-		environment.jersey().register(kafkaTopicResource);
+		final KaBoomRunningConfigResource kaboomRunningResource = new KaBoomRunningConfigResource(
+			 kaboomCurator, 
+			 configuration.getKaboomZkConfigPath());
 
-		final KaBoomTopicResource kaboomTopicResource = new KaBoomTopicResource(kaboomCurator, 
+		final KaBoomTopicResource kaboomTopicResource = new KaBoomTopicResource(
+			 kaboomCurator, 
 			 configuration.getKaboomZkTopicPath(),
 			 configuration.getKaboomZkAssignmentPath());
-		environment.jersey().register(kaboomTopicResource);
 		
-		final KaBoomClientResource kaboomClientResource = new KaBoomClientResource(kaboomCurator,
+		final KaBoomClientResource kaboomClientResource = new KaBoomClientResource(
+			 kaboomCurator,
 			 configuration.getKaboomZkClientPath());		
-		environment.jersey().register(kaboomClientResource);
-
+		
 		// Health Checks
 		
 		final CuratorHealthCheck kaboomZkHealthCheck = new CuratorHealthCheck(kaboomCurator);
-		environment.healthChecks().register("kaboomCurator", kaboomZkHealthCheck);
-		
 		final CuratorHealthCheck kafkaZkHealthCheck = new CuratorHealthCheck(kafkaCurator);
+		
+		// Registrations
+		
+		environment.jersey().register(kafkaTopicResource);
+		environment.jersey().register(kafkaBrokerResource);
+		environment.jersey().register(kafkaTopicResource);
+		environment.jersey().register(kaboomTopicResource);
+		environment.jersey().register(kaboomClientResource);
+		environment.jersey().register(kaboomRunningResource);
+		
+		environment.healthChecks().register("kaboomCurator", kaboomZkHealthCheck);
 		environment.healthChecks().register("kafkaCurator", kafkaZkHealthCheck);		
 	}
 }

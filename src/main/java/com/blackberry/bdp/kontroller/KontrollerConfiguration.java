@@ -5,16 +5,30 @@
  */
 package com.blackberry.bdp.kontroller;
 
+import com.bazaarvoice.dropwizard.assets.AssetsBundleConfiguration;
+import com.bazaarvoice.dropwizard.assets.AssetsConfiguration;
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  *
  * @author dariens
  */
-public class KontrollerConfiguration extends Configuration {
-	
+public class KontrollerConfiguration extends Configuration implements AssetsBundleConfiguration {
+
+	@Valid
+	@NotNull
+	@JsonProperty
+	private final AssetsConfiguration assets = new AssetsConfiguration();
+
+	@Override
+	public AssetsConfiguration getAssetsConfiguration() {
+		return assets;
+	}
+
 	// The path in kafka's zk for where brokers are kept
 	@NotEmpty
 	private String kafkaZkBrokerPath;
@@ -29,6 +43,20 @@ public class KontrollerConfiguration extends Configuration {
 		this.kafkaZkBrokerPath = kafkaZkBrokerPath;
 	}
 
+	// The path in kaboom's zk for where the RunningConfiguration is kept
+	@NotEmpty
+	private String kaboomZkConfigPath;
+
+	@JsonProperty
+	public String getKaboomZkConfigPath() {
+		return kaboomZkConfigPath;
+	}
+
+	@JsonProperty
+	public void setKaboomZkConfigPath(String kaboomZkConfigPath) {
+		this.kaboomZkConfigPath = kaboomZkConfigPath;
+	}
+	
 	// The path in kaboom's zk for where assignments are kept
 	@NotEmpty
 	private String kaboomZkAssignmentPath;
