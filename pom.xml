@@ -52,7 +52,7 @@
 			<version>0.2.2</version>
 		</dependency>		
 						
-		<!-- Lombok 
+		<!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -63,7 +63,7 @@
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.9.13</version>
-		</dependency>-->
+		</dependency>
 		
 		<!-- Guava 18.0 specifically, prevents curator from downgrading Guava to 16.0.  There might be better way of doing this  -->
 		<dependency>

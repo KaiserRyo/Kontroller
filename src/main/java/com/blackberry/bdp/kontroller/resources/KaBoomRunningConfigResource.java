@@ -6,7 +6,7 @@
 package com.blackberry.bdp.kontroller.resources;
 
 //import com.blackberry.bdp.kontroller.core.KaBoomClients;
-import com.blackberry.bdp.common.annotations.MissingConfigurationException;
+import com.blackberry.bdp.common.versioned.MissingConfigurationException;
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
