@@ -13,6 +13,7 @@ import com.blackberry.bdp.kontroller.resources.KafkaTopicResource;
 import com.blackberry.bdp.kontroller.resources.KafkaBrokerResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomTopicResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomRunningConfigResource;
+import com.blackberry.bdp.kontroller.resources.KaBoomTopicConfigResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomClientResource;
 import com.blackberry.bdp.kontroller.health.CuratorHealthCheck;
 //import io.dropwizard.assets.AssetsBundle;
@@ -63,6 +64,10 @@ public class KontrollerApplication extends Application<KontrollerConfiguration>
 			 kaboomCurator, 
 			 configuration.getKaboomZkConfigPath());
 
+		final KaBoomTopicConfigResource kaboomTopicConfigResource = new KaBoomTopicConfigResource(
+			 kaboomCurator, 
+			 configuration.getKaboomZkTopicPath());		
+		
 		final KaBoomTopicResource kaboomTopicResource = new KaBoomTopicResource(
 			 kaboomCurator, 
 			 configuration.getKaboomZkTopicPath(),
@@ -85,6 +90,7 @@ public class KontrollerApplication extends Application<KontrollerConfiguration>
 		environment.jersey().register(kaboomTopicResource);
 		environment.jersey().register(kaboomClientResource);
 		environment.jersey().register(kaboomRunningResource);
+		environment.jersey().register(kaboomTopicConfigResource);
 		
 		environment.healthChecks().register("kaboomCurator", kaboomZkHealthCheck);
 		environment.healthChecks().register("kafkaCurator", kafkaZkHealthCheck);		
