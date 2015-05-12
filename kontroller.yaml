@@ -1,6 +1,18 @@
-template: Hello, %s!
-defaultName: Stranger
+assets:
+  overrides:
+    /: /root/kontroller/static/
 
-kaboomZkConnString: r3k1.kafka.log82.bblabs:2181,r3k2.kafka.log82.bblabs:2181,r3k3.kafka.log82.bblabs:2181/KaBoomDev
-kafkaZkConnString: r3k1.kafka.log82.bblabs:2181,r3k2.kafka.log82.bblabs:2181,r3k3.kafka.log82.bblabs:2181
-#kafkaMetadataBrokerList: r3k1.kafka.log82.bblabs:9092,r3k2.kafka.log82.bblabs:9092,r3k3.kafka.log82.bblabs:9092
+server:
+  rootPath: /api/*
+  gzip:
+    bufferSize: 8KiB
+
+kaboomZkConnString: server1.kafka.example.com:2181,server2.kafka.example.com:2181,server3.kafka.example.com:2181/KaBoomDev
+kaboomZkTopicPath: /kaboom/topics #remember, this is relative to the root at the end of kaboomZkConnString:
+kaboomZkClientPath: /kaboom/clients #remember, this is relative to the root at the end of kaboomZkConnString:
+kaboomZkAssignmentPath: /kaboom/assignments #remember, this is relative to the root at the end of kaboomZkConnString:
+kaboomZkConfigPath: /kaboom/config #remember, this is relative to the root at the end of kaboomZkConnString:
+kafkaZkConnString: server1.kafka.example.com:2181,server2.kafka.example.com:2181,server3.kafka.example.com:2181
+kafkaSeedBrokers: server1.kafka.example.com:9092,server2.kafka.example.com:9092,server3.kafka.example.com:9092
+kafkaZkBrokerPath: /brokers/ids #again--remember, although BDP doesn't usually prefix kafka namespace
+
