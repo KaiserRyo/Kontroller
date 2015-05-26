@@ -42,7 +42,7 @@
 		<!-- kaboom -->
 		<dependency>
 			<groupId>com.blackberry.bdp.kaboom</groupId>
-			<artifactId>kaboom-0.8.0</artifactId>
+			<artifactId>kaboom</artifactId>
 			<version>0.8.0</version>
 		</dependency>
 

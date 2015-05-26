@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType;
 import com.blackberry.bdp.kaboom.api.KaBoomTopicConfig;
 import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
@@ -47,19 +47,19 @@ public class KaBoomTopicConfigResource {
 		return KaBoomTopicConfig.getAll(curator, kaboomZkTopicPath);
 	}
 	
-	/*
-	
-	@POST
+	@PUT @Path("{id}")
 	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	public KaBoomTopicConfig save(KaBoomTopicConfig topicConfig) throws Exception {
+		LOG.info("We're here in save()");
 		// Objects we get back in from our external API won't have 
 		// curator/zkPath set, so let's set them from our resource config
-		//runningConfig.setCurator(curator);
-		//runningConfig.setZkPath(kaboomZkTopicPath);
+		// Note that we need to change the path to reflect the topic name
+		// which is the same as the ID.
+		topicConfig.setCurator(curator);
+		topicConfig.setZkPath(String.format("%s/%s", kaboomZkTopicPath, topicConfig.id));
 		// save, updates the version, so just return it.
-		//runningConfig.save();
-		//return runningConfig;
-	}*/
-
+		topicConfig.save();
+		return topicConfig;
+	}
 }
