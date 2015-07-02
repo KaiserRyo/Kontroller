@@ -10,6 +10,12 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 	</properties>
+	<!--<repositories>
+		<repository>
+			<id>jcenter</id>
+			<url>http://jcenter.bintray.com</url>
+		</repository>
+	</repositories>-->
 	<dependencies>
 		<!--
 		<dependency>
@@ -18,6 +24,13 @@
 			<version>0.0.8</version>
 		</dependency>-->
 		
+		<dependency>
+			<groupId>com.unboundid</groupId>
+			<artifactId>unboundid-ldapsdk</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		
+		
 		<!-- Curator Framework -->
 		<dependency>
 			<groupId>org.apache.curator</groupId>
@@ -25,18 +38,32 @@
 			<version>2.7.1</version>
 		</dependency>
 		
+		<!-- We now include our auth authentication module for LDAP 
+		<dependency>
+			<groupId>com.yammer.dropwizard</groupId>
+			<artifactId>dropwizard-auth-ldap</artifactId>
+			<version>0.2.0</version>
+		</dependency>-->
+		
 		<!-- Dropwizard -->
 		<dependency>
 			<groupId>io.dropwizard</groupId>
 			<artifactId>dropwizard-core</artifactId>
-			<version>0.8.0</version>
+			<version>0.8.1</version>
 		</dependency>
+		
+		<!-- Dropwizard Auth -->		
+		<dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-auth</artifactId>
+                <version>0.8.1</version>
+            </dependency>		
 		
 		<!-- Dropwizard -->
 		<dependency>
 			<groupId>io.dropwizard</groupId>
 			<artifactId>dropwizard-assets</artifactId>
-			<version>0.8.0</version>
+			<version>0.8.1</version>
 		</dependency>
 
 		<!-- kaboom -->

@@ -7,8 +7,10 @@ package com.blackberry.bdp.kontroller;
 
 import com.bazaarvoice.dropwizard.assets.AssetsBundleConfiguration;
 import com.bazaarvoice.dropwizard.assets.AssetsConfiguration;
+import com.blackberry.bdp.kontroller.ldap.LdapConfiguration;
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -139,6 +141,20 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 	@JsonProperty
 	public void setKafkaZkConnString(String kafkaZkConnString) {
 		this.kafkaZkConnString = kafkaZkConnString;
+	}
+
+	// The connection string for kafka's curator instance
+	//@NotEmpty
+	private LdapConfiguration ldapConfiguration;
+
+	//@JsonProperty
+	public LdapConfiguration getLdapConfiguration() {
+		return ldapConfiguration;
+	}
+
+	//@JsonProperty
+	public void setLdapConfiguration(LdapConfiguration ldapConfiguration) {
+		this.ldapConfiguration = ldapConfiguration;
 	}
 
 }

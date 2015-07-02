@@ -7,6 +7,7 @@ package com.blackberry.bdp.kontroller.resources;
 
 //import com.blackberry.bdp.kontroller.core.KaBoomClients;
 import com.blackberry.bdp.common.versioned.MissingConfigurationException;
+
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
@@ -14,7 +15,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.blackberry.bdp.kontroller.ldap.User;
+
 import com.blackberry.bdp.kaboom.api.RunningConfig;
+
+import io.dropwizard.auth.Auth;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 
@@ -38,14 +44,16 @@ public class KaBoomRunningConfigResource {
 	/**
 	 * Fetches the current KaBoom RunningConfig from ZK if present or a default initialized RunningConfig if none is found in ZK
 	 *
+	 * @param user
 	 * @return
 	 * @throws Exception
 	 */
 	@GET
 	@Timed
 	@Produces(value = MediaType.APPLICATION_JSON)
-	public RunningConfig get() throws Exception {
+	public RunningConfig get(@Auth User user) throws Exception {
 		RunningConfig runningConfig;
+		LOG.info("We have a user: {}", user.getName());
 		try {
 			runningConfig = RunningConfig.get(curator, kaboomZkConfigPath);
 		} catch (MissingConfigurationException mce) {
