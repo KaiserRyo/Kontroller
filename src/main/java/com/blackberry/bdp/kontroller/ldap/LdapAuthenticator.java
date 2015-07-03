@@ -9,6 +9,7 @@ import com.google.common.base.Optional;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPSearchException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchRequest;
 import com.unboundid.ldap.sdk.SearchResult;
@@ -23,7 +24,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.security.x509.X500Name;
 
 /**
  *
@@ -31,37 +31,33 @@ import sun.security.x509.X500Name;
  */
 public class LdapAuthenticator implements Authenticator<BasicCredentials, User> {
 
-	/**
-	 * Creates a new authenticator
-	 *
-	 * @param connectionFactory
-	 * @param searchDN the base DN in which to perform a search for the user's DN by uid.
-	 * @param rolesDN the base DN in which to lookup roles for a user.
-	 */
-	public LdapAuthenticator(LdapConnectionFactory connectionFactory, String searchDN, String rolesDN) {
+	private static final Logger LOG = LoggerFactory.getLogger(LdapAuthenticator.class);
+	private final LdapConnectionFactory connectionFactory;
+	private final LdapConfiguration config;
+
+	public LdapAuthenticator(LdapConnectionFactory connectionFactory, LdapConfiguration config) {
 		this.connectionFactory = connectionFactory;
-		this.searchDN = searchDN;
-		this.rolesDN = rolesDN;
+		this.config = config;
 	}
 
 	@Override
-	public Optional<User> authenticate(BasicCredentials credentials) throws AuthenticationException {		
+	public Optional<User> authenticate(BasicCredentials credentials) throws AuthenticationException {
 		try {
 			String username = sanitizeUsername(credentials.getUsername());
 			String userDN = dnFromUsername(username);
-
 			verifyCredentials(credentials, userDN);
-
-			Set<String> roles = rolesFromDN(userDN);
-
+			Set<String> roles = membershipsFromBaseDNs(userDN);
 			return Optional.fromNullable(new User(username, roles));
 		} catch (LDAPException le) {
 			if (invalidCredentials(le)) {
 				throw new AuthenticationException("Could not connect to LDAP server", le);
 			} else {
-				logger.error("Error logging in: ", le);
+				LOG.error("Error logging in: ", le);
 				return Optional.absent();
 			}
+		} catch (IOException ioe) {
+			LOG.error("Error logging in: ", ioe);
+			return Optional.absent();
 		}
 	}
 
@@ -69,69 +65,72 @@ public class LdapAuthenticator implements Authenticator<BasicCredentials, User> 
 		return le.getResultCode() != ResultCode.INVALID_CREDENTIALS;
 	}
 
-	private void verifyCredentials(BasicCredentials credentials, String userDN) throws LDAPException {
+	private void verifyCredentials(BasicCredentials credentials, String userDN)
+		 throws LDAPException, AuthenticationException {
 		LDAPConnection authenticatedConnection
 			 = connectionFactory.getLDAPConnection(userDN, credentials.getPassword());
 		authenticatedConnection.close();
 	}
 
-	private String dnFromUsername(String username) throws LDAPException {
+	private String dnFromUsername(String username) throws LDAPException, AuthenticationException {
 		LDAPConnection connection = connectionFactory.getLDAPConnection();
-		logger.info("We're here to get the DN");
 		try {
-			SearchRequest searchRequest = new SearchRequest(searchDN, SearchScope.SUB, "(sAMAccountName=" + username + ")");
-
+			SearchRequest searchRequest = new SearchRequest(config.getUserFilter(),
+				 SearchScope.SUB,
+				 String.format("(sAMAccountName=%s)", username));
 			SearchResult sr = connection.search(searchRequest);
-			logger.info("There were {} search results getting the DN", sr.getEntryCount());
 			if (sr.getEntryCount() == 0) {
 				throw new LDAPException(ResultCode.INVALID_CREDENTIALS);
 			}
-
-			logger.info("user DN for {} is {}", username, sr.getSearchEntries().get(0).getDN());
+			LOG.info("user DN for {} is {}", username, sr.getSearchEntries().get(0).getDN());
 			return sr.getSearchEntries().get(0).getDN();
 		} catch (Exception e) {
-			logger.error("Failed to get the DN for {}", username, e);
+			LOG.error("Failed to get the DN for {}", username, e);
 			throw e;
 		} finally {
 			connection.close();
 		}
 	}
 
-	private Set<String> rolesFromDN(String userDN) throws LDAPException {
+	private Set<String> membershipsFromBaseDNs(String userDN)
+		 throws LDAPException, LDAPSearchException, AuthenticationException, IOException {
+		Set<String> groupMembershipSet = new LinkedHashSet<>();
 		LDAPConnection connection = connectionFactory.getLDAPConnection();
-		SearchRequest searchRequest = new SearchRequest(rolesDN,
-			 SearchScope.SUB, Filter.createEqualityFilter("uniqueMember", userDN));
-		Set<String> applicationAccessSet = new LinkedHashSet<String>();
-
 		try {
-			SearchResult sr = connection.search(searchRequest);
-
-			for (SearchResultEntry sre : sr.getSearchEntries()) {
-				try {
-					X500Name myName = new X500Name(sre.getDN());
-					applicationAccessSet.add(myName.getCommonName());
-				} catch (IOException e) {
-					logger.error("Could not create X500 Name for role:" + sre.getDN(), e);
-				}
-			}
-		} catch (Exception e) {
-			logger.error("Failed to get roles for user DN for {}", userDN, e);
-			throw e;
+			LOG.info("Search baseDN {} for membership", config.getGroupBaseDN());
+			recursiveMemberShipSetBuilder(
+				 connection,
+				 groupMembershipSet,
+				 config.getGroupBaseDN(),
+				 userDN);
 		} finally {
 			connection.close();
 		}
+		return groupMembershipSet;
+	}
 
-		return applicationAccessSet;
+	private void recursiveMemberShipSetBuilder(
+		 LDAPConnection connection,
+		 Set<String> membershipSet,
+		 String baseDN,
+		 String nodeDN) throws LDAPSearchException, IOException {
+		SearchRequest searchRequest = new SearchRequest(
+			 baseDN,
+			 SearchScope.SUB,
+			 Filter.createEqualityFilter("member", nodeDN));
+		SearchResult sr = connection.search(searchRequest);
+		LOG.info("There are {} memberships associated to {}", sr.getEntryCount(), nodeDN);
+		for (SearchResultEntry sre : sr.getSearchEntries()) {
+			if (!membershipSet.contains(sre.getDN())) {
+				LOG.info("{} is a member of {}", nodeDN, sre.getDN());
+				membershipSet.add(sre.getDN());
+				recursiveMemberShipSetBuilder(connection, membershipSet, baseDN, sre.getDN());
+			}
+		}
 	}
 
 	private String sanitizeUsername(String username) {
 		return username.replaceAll("[^A-Za-z0-9-_.]", "");
 	}
-
-	private static final Logger logger = LoggerFactory.getLogger(LdapAuthenticator.class);
-
-	private final LdapConnectionFactory connectionFactory;
-	private String searchDN;
-	private String rolesDN;
 
 }

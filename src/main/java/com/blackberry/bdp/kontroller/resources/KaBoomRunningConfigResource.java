@@ -54,6 +54,11 @@ public class KaBoomRunningConfigResource {
 	public RunningConfig get(@Auth User user) throws Exception {
 		RunningConfig runningConfig;
 		LOG.info("We have a user: {}", user.getName());
+		
+		for (String role : user.getRoles()) {
+			LOG.info("User {} associated to role {}", user.getName(), role);
+		}
+		
 		try {
 			runningConfig = RunningConfig.get(curator, kaboomZkConfigPath);
 		} catch (MissingConfigurationException mce) {

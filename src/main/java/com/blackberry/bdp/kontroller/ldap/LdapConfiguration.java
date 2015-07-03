@@ -21,17 +21,45 @@ public class LdapConfiguration {
 	/************************************************************************************************************
 	* URI 
 	************************************************************************************************************/
-	@NotNull @Valid private URI uri = URI.create("ldaps://www.example.com:636");
+	@NotNull @Valid private String ldapServers = "ldap://www.example.com:389";
 
-	public LdapConfiguration setUri(URI uri) {
-		this.uri = uri;
+	public LdapConfiguration setLdapServers(String ldapServers) {
+		this.ldapServers = ldapServers;
 		return this;
 	}
 	
-	public URI getUri() {
-		return uri;
+	public String getLdapServers() {
+		return ldapServers;
 	}	
 
+	/************************************************************************************************************
+	* Trust any secure host?
+	************************************************************************************************************/
+	@NotNull @Valid private boolean trustAnySecuredHost = false;
+
+	public LdapConfiguration setTrustAnySecuredHost (boolean trustAnySecuredHost) {
+		this.trustAnySecuredHost = trustAnySecuredHost;
+		return this;
+	}
+	
+	public boolean getTrustAnySecuredHost() {
+		return trustAnySecuredHost;
+	}	
+	
+	/************************************************************************************************************
+	* Base DNs for looking up memberships
+	************************************************************************************************************/
+	@NotNull @Valid private String  groupBaseDN;
+
+	public LdapConfiguration setGroupBaseDN (String groupBaseDNs) {
+		this.groupBaseDN = groupBaseDNs;
+		return this;
+	}
+	
+	public String getGroupBaseDN() {
+		return groupBaseDN;
+	}	
+	
 	/************************************************************************************************************
 	* Cache Builder
 	************************************************************************************************************/
@@ -59,10 +87,12 @@ public class LdapConfiguration {
 		this.userFilter = userFilter;
 		return this;
 	}
-
+	
+	
 	/************************************************************************************************************
 	* Group FIllter
 	************************************************************************************************************/
+	/*
 	@NotNull @NotEmpty private String groupFilter = "ou=groups,dc=example,dc=com";
 	
 	public String getGroupFilter() {
@@ -73,7 +103,8 @@ public class LdapConfiguration {
 		this.groupFilter = groupFilter;
 		return this;
 	}
-
+	*/
+	
 	/************************************************************************************************************
 	* Username
 	************************************************************************************************************/

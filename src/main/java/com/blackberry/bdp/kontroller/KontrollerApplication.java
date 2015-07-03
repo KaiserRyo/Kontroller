@@ -55,23 +55,11 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 	}
 
 	@Override
-	public void run(KontrollerConfiguration configuration, Environment environment) throws AuthenticationException {
+	public void run(KontrollerConfiguration configuration, Environment environment) throws AuthenticationException, Exception {
 
 		LdapConfiguration ldapConfiguration = configuration.getLdapConfiguration();
-		
-		LdapConnectionFactory ldapConnFactory = new LdapConnectionFactory(
-			 ldapConfiguration.getUri().toString(),
-			 389,
-			 ldapConfiguration.getUsername(),
-			 ldapConfiguration.getPassword()
-		);
-		
-		LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(
-			 ldapConnFactory,
-			 ldapConfiguration.getUserFilter(),
-			 ldapConfiguration.getGroupFilter()
-		);
-		
+		LdapConnectionFactory ldapConnFactory = new LdapConnectionFactory(ldapConfiguration);
+		LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConnFactory, ldapConfiguration);		
 		Authenticator<BasicCredentials, User> cachedAuthenticator = new CachingAuthenticator<>(
 			 environment.metrics(),
 			 ldapAuthenticator,
