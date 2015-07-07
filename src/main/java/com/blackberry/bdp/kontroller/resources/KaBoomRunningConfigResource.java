@@ -15,9 +15,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.blackberry.bdp.kontroller.ldap.User;
+import com.blackberry.bdp.dwauth.ldap.User;
+import com.blackberry.bdp.dwauth.ldap.AccessDeniedException;
 
 import com.blackberry.bdp.kaboom.api.RunningConfig;
+import com.blackberry.bdp.kontroller.KontrollerConfiguration;
 
 import io.dropwizard.auth.Auth;
 
@@ -34,11 +36,12 @@ public class KaBoomRunningConfigResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KaBoomRunningConfigResource.class);
 	private final CuratorFramework curator;
-	private final String kaboomZkConfigPath;
+	private final KontrollerConfiguration config;	
 
-	public KaBoomRunningConfigResource(CuratorFramework curator, String kaboomZkConfigPath) {
+	public KaBoomRunningConfigResource(CuratorFramework curator, 
+		 KontrollerConfiguration config) {		
 		this.curator = curator;
-		this.kaboomZkConfigPath = kaboomZkConfigPath;
+		this.config = config;
 	}
 
 	/**
@@ -52,22 +55,18 @@ public class KaBoomRunningConfigResource {
 	@Timed
 	@Produces(value = MediaType.APPLICATION_JSON)
 	public RunningConfig get(@Auth User user) throws Exception {
-		RunningConfig runningConfig;
-		LOG.info("We have a user: {}", user.getName());
-		
-		for (String role : user.getRoles()) {
-			LOG.info("User {} associated to role {}", user.getName(), role);
-		}
-		
-		try {
-			runningConfig = RunningConfig.get(curator, kaboomZkConfigPath);
+		if (!user.getMemberships().contains(config.getAdminGroupDn())) {			
+			LOG.error("User {} is not a member of group {}", user.getName(), config.getAdminGroupDn());
+			throw new AccessDeniedException();
+		}				
+		try {			
+			return RunningConfig.get(curator, config.getKaboomZkConfigPath());			
 		} catch (MissingConfigurationException mce) {
 			LOG.info("Missing configuration at {}, returning default {}", 
-				 kaboomZkConfigPath,
+				 config.getKaboomZkConfigPath(),
 				 RunningConfig.class);
-			runningConfig = new RunningConfig();
-		}
-		return runningConfig;
+			return new RunningConfig();
+		}		
 	}
 
 	@POST
@@ -77,10 +76,9 @@ public class KaBoomRunningConfigResource {
 		// Objects we get back in from our external API won't have 
 		// curator/zkPath set, so let's set them from our resource config
 		runningConfig.setCurator(curator);
-		runningConfig.setZkPath(kaboomZkConfigPath);
+		runningConfig.setZkPath(config.getKaboomZkConfigPath());
 		// save, updates the version, so just return it.
 		runningConfig.save();
 		return runningConfig;
 	}
-
 }

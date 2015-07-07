@@ -9,10 +9,11 @@ import com.bazaarvoice.dropwizard.assets.ConfiguredAssetsBundle;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import com.blackberry.bdp.kontroller.ldap.LdapAuthenticator;
-import com.blackberry.bdp.kontroller.ldap.LdapConnectionFactory;
-import com.blackberry.bdp.kontroller.ldap.User;
-import com.blackberry.bdp.kontroller.ldap.LdapConfiguration;
+import com.blackberry.bdp.dwauth.ldap.AccessDeniedHandler;
+import com.blackberry.bdp.dwauth.ldap.LdapAuthenticator;
+import com.blackberry.bdp.dwauth.ldap.LdapConnectionFactory;
+import com.blackberry.bdp.dwauth.ldap.User;
+import com.blackberry.bdp.dwauth.ldap.LdapConfiguration;
 import com.blackberry.bdp.kontroller.resources.KafkaTopicResource;
 import com.blackberry.bdp.kontroller.resources.KafkaBrokerResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomTopicResource;
@@ -55,61 +56,52 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 	}
 
 	@Override
-	public void run(KontrollerConfiguration configuration, Environment environment) throws AuthenticationException, Exception {
-
-		LdapConfiguration ldapConfiguration = configuration.getLdapConfiguration();
+	public void run(KontrollerConfiguration config, Environment environment) throws AuthenticationException, Exception {
+		
+		LdapConfiguration ldapConfiguration = config.getLdapConfiguration();
 		LdapConnectionFactory ldapConnFactory = new LdapConnectionFactory(ldapConfiguration);
-		LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConnFactory, ldapConfiguration);		
+		LdapAuthenticator ldapAuthenticator = new LdapAuthenticator(ldapConnFactory, ldapConfiguration);
 		Authenticator<BasicCredentials, User> cachedAuthenticator = new CachingAuthenticator<>(
 			 environment.metrics(),
 			 ldapAuthenticator,
-			 configuration.getLdapConfiguration().getCachePolicy()
+			 config.getLdapConfiguration().getCachePolicy()
 		);
 
 		environment.jersey().register(AuthFactory.binder(new BasicAuthFactory<>(cachedAuthenticator, "realm", User.class)));
-		
-		//environment.healthChecks().register("ldap", new LdapHealthCheck<>(new ResourceAuthenticator(new LdapCanAuthenticate(ldapConfiguration))));
+		environment.jersey().register(new AccessDeniedHandler());
 
-		kaboomCurator = CuratorBuilder.build(configuration.getKaboomZkConnString(), true);
-		kafkaCurator = CuratorBuilder.build(configuration.getKafkaZkConnString(), true);
+		kaboomCurator = CuratorBuilder.build(config.getKaboomZkConnString(), true);
+		kafkaCurator = CuratorBuilder.build(config.getKafkaZkConnString(), true);
 
-		// Publically Accesible Resources	
-		final KafkaBrokerResource kafkaBrokerResource = new KafkaBrokerResource(
-			 kafkaCurator,
-			 configuration.getKafkaZkBrokerPath());
+		final KafkaBrokerResource kafkaBrokerResource;
+		kafkaBrokerResource = new KafkaBrokerResource(kafkaCurator, config.getKafkaZkBrokerPath());
+		environment.jersey().register(kafkaBrokerResource);
 
-		final KafkaTopicResource kafkaTopicResource = new KafkaTopicResource(
-			 configuration.getKafkaSeedBrokers());
+		final KafkaTopicResource kafkaTopicResource;
+		kafkaTopicResource = new KafkaTopicResource(config.getKafkaSeedBrokers());
+		environment.jersey().register(kafkaTopicResource);
 
-		final KaBoomRunningConfigResource kaboomRunningResource = new KaBoomRunningConfigResource(
-			 kaboomCurator,
-			 configuration.getKaboomZkConfigPath());
+		final KaBoomRunningConfigResource kaboomRunningConfigResource;		
+		kaboomRunningConfigResource = new KaBoomRunningConfigResource(kaboomCurator, config);
+		environment.jersey().register(kaboomRunningConfigResource);
 
-		final KaBoomTopicConfigResource kaboomTopicConfigResource = new KaBoomTopicConfigResource(
-			 kaboomCurator,
-			 configuration.getKaboomZkTopicPath());
+		final KaBoomTopicConfigResource kaboomTopicConfigResource;
+		kaboomTopicConfigResource = new KaBoomTopicConfigResource(kaboomCurator, config);
+		environment.jersey().register(kaboomTopicConfigResource);
 
-		final KaBoomTopicResource kaboomTopicResource = new KaBoomTopicResource(
-			 kaboomCurator,
-			 configuration.getKaboomZkTopicPath(),
-			 configuration.getKaboomZkAssignmentPath());
+		final KaBoomTopicResource kaboomTopicResource;
+		kaboomTopicResource = new KaBoomTopicResource(kaboomCurator, config);
+		environment.jersey().register(kaboomTopicResource);
 
-		final KaBoomClientResource kaboomClientResource = new KaBoomClientResource(
-			 kaboomCurator,
-			 configuration.getKaboomZkClientPath());
+		final KaBoomClientResource kaboomClientResource;
+		kaboomClientResource = new KaBoomClientResource(kaboomCurator, config);
+		environment.jersey().register(kaboomClientResource);
 
 		// Health Checks
 		final CuratorHealthCheck kaboomZkHealthCheck = new CuratorHealthCheck(kaboomCurator);
-		final CuratorHealthCheck kafkaZkHealthCheck = new CuratorHealthCheck(kafkaCurator);
-
-		// Registrations
-		environment.jersey().register(kafkaTopicResource);
-		environment.jersey().register(kafkaBrokerResource);
-		environment.jersey().register(kaboomTopicResource);
-		environment.jersey().register(kaboomClientResource);
-		environment.jersey().register(kaboomRunningResource);
-		environment.jersey().register(kaboomTopicConfigResource);
-
+		final CuratorHealthCheck kafkaZkHealthCheck = new CuratorHealthCheck(kafkaCurator);		
+		//environment.healthChecks().register("ldap", new LdapHealthCheck<>(new ResourceAuthenticator(new LdapCanAuthenticate(ldapConfiguration))));
+		
 		environment.healthChecks().register("kaboomCurator", kaboomZkHealthCheck);
 		environment.healthChecks().register("kafkaCurator", kafkaZkHealthCheck);
 	}

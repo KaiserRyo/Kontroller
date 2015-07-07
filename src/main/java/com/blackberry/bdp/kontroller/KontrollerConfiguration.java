@@ -7,7 +7,7 @@ package com.blackberry.bdp.kontroller;
 
 import com.bazaarvoice.dropwizard.assets.AssetsBundleConfiguration;
 import com.bazaarvoice.dropwizard.assets.AssetsConfiguration;
-import com.blackberry.bdp.kontroller.ldap.LdapConfiguration;
+import com.blackberry.bdp.dwauth.ldap.LdapConfiguration;
 import io.dropwizard.Configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -58,7 +58,7 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 	public void setKaboomZkConfigPath(String kaboomZkConfigPath) {
 		this.kaboomZkConfigPath = kaboomZkConfigPath;
 	}
-	
+
 	// The path in kaboom's zk for where assignments are kept
 	@NotEmpty
 	private String kaboomZkAssignmentPath;
@@ -143,7 +143,7 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 		this.kafkaZkConnString = kafkaZkConnString;
 	}
 
-	// The connection string for kafka's curator instance
+	// The LdapConfiguration for Authentication/Authorization
 	//@NotEmpty
 	private LdapConfiguration ldapConfiguration;
 
@@ -157,4 +157,17 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 		this.ldapConfiguration = ldapConfiguration;
 	}
 
+	// The full LDAP distinguished name of the administrative group (write access)
+	@NotEmpty
+	private String adminGroupDn;
+
+	@JsonProperty
+	public String getAdminGroupDn() {
+		return adminGroupDn;
+	}
+
+	@JsonProperty
+	public void setAdminGroupDn(String adminGroupDn) {
+		this.adminGroupDn = adminGroupDn;
+	}
 }

@@ -5,16 +5,15 @@
  */
 package com.blackberry.bdp.kontroller.resources;
 
-import com.blackberry.bdp.kontroller.core.KaBoomTopics;
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.concurrent.atomic.AtomicLong;
 
 import com.blackberry.bdp.kaboom.api.KaBoomTopic;
+import com.blackberry.bdp.kontroller.KontrollerConfiguration;
 
 import java.util.List;
 import org.apache.curator.framework.CuratorFramework;
@@ -25,25 +24,22 @@ import org.slf4j.LoggerFactory;
 public class KaBoomTopicResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KaBoomTopicResource.class);
-	private final AtomicLong counter;
+	
 	private final CuratorFramework curator;
-	private final String kaboomZkTopicPath;
-	private final String kaboomZkAssignmentPath;
+	private final KontrollerConfiguration config;
+	
+	//private final String kaboomZkTopicPath;
+	//private final String kaboomZkAssignmentPath;
 
-	public KaBoomTopicResource(CuratorFramework curator, 
-		 String kaboomZkTopicPath,
-		 String kaboomZkAssignmentPath) {
+	public KaBoomTopicResource(CuratorFramework curator, KontrollerConfiguration config) {
 		this.curator = curator;
-		this.kaboomZkTopicPath = kaboomZkTopicPath;
-		this.kaboomZkAssignmentPath = kaboomZkAssignmentPath;
-		this.counter = new AtomicLong();
+		this.config = config;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public KaBoomTopics getAll() throws Exception {
-		final List<KaBoomTopic> topics = KaBoomTopic.getAll(curator, 
-			 kaboomZkTopicPath,
-			 kaboomZkAssignmentPath);
-		return new KaBoomTopics(counter.incrementAndGet(), topics);
+	public List<KaBoomTopic> getAll() throws Exception {
+		return KaBoomTopic.getAll(curator, 
+			 config.getKaboomZkTopicPath(),
+			 config.getKaboomZkAssignmentPath());		
 	}
 }

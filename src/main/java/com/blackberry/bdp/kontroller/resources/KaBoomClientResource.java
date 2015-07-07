@@ -12,9 +12,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.concurrent.atomic.AtomicLong;
 
 import com.blackberry.bdp.kaboom.api.KaBoomClient;
+import com.blackberry.bdp.kontroller.KontrollerConfiguration;
 
 import java.util.List;
 import org.apache.curator.framework.CuratorFramework;
@@ -24,20 +24,17 @@ import org.slf4j.LoggerFactory;
 @Path("/kaboom-client") @Produces(MediaType.APPLICATION_JSON)
 public class KaBoomClientResource {
 
-	private static final Logger LOG = LoggerFactory.getLogger(KaBoomClientResource.class);
-	private final AtomicLong counter;
+	private static final Logger LOG = LoggerFactory.getLogger(KaBoomClientResource.class);	
 	private final CuratorFramework curator;
-	private final String kaboomZkClientPath;
+	private final KontrollerConfiguration config;
 
-	public KaBoomClientResource(CuratorFramework curator, String kaboomZkClientPath) {
+	public KaBoomClientResource(CuratorFramework curator, KontrollerConfiguration config) {
 		this.curator = curator;
-		this.kaboomZkClientPath = kaboomZkClientPath;
-		this.counter = new AtomicLong();
+		this.config = config;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
 	public List<KaBoomClient> getAll() throws Exception {
-		return KaBoomClient.getAll(curator, kaboomZkClientPath);
-		//return new KaBoomClients(counter.incrementAndGet(), clients);
+		return KaBoomClient.getAll(curator, config.getKaboomZkClientPath());
 	}
 }

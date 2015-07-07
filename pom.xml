@@ -5,45 +5,25 @@
 	<artifactId>kontroller</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>
+	
+	<scm>
+		<connection>scm:git:git@gitlab.rim.net:ipgbd-software/kontroller</connection>
+		<developerConnection>scm:git:git@gitlab.rim.net:ipgbd-software/kontroller.git</developerConnection>
+		<url>https://gitlab.rim.net/ipgbd-software/kontroller</url>
+	</scm>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 	</properties>
-	<!--<repositories>
-		<repository>
-			<id>jcenter</id>
-			<url>http://jcenter.bintray.com</url>
-		</repository>
-	</repositories>-->
 	<dependencies>
-		<!--
-		<dependency>
-			<groupId>com.blackberry.bdp.common</groupId>
-			<artifactId>bdp-common-dev</artifactId>
-			<version>0.0.8</version>
-		</dependency>-->
-		
-		<dependency>
-			<groupId>com.unboundid</groupId>
-			<artifactId>unboundid-ldapsdk</artifactId>
-			<version>3.0.0</version>
-		</dependency>
-		
-		
 		<!-- Curator Framework -->
 		<dependency>
 			<groupId>org.apache.curator</groupId>
 			<artifactId>curator-recipes</artifactId>
 			<version>2.8.0</version>
 		</dependency>
-		
-		<!-- We now include our auth authentication module for LDAP 
-		<dependency>
-			<groupId>com.yammer.dropwizard</groupId>
-			<artifactId>dropwizard-auth-ldap</artifactId>
-			<version>0.2.0</version>
-		</dependency>-->
 		
 		<!-- Dropwizard -->
 		<dependency>
@@ -64,6 +44,13 @@
 			<groupId>io.dropwizard</groupId>
 			<artifactId>dropwizard-assets</artifactId>
 			<version>0.8.1</version>
+		</dependency>
+
+		<!-- BB Dropwizard AD LDAP Auth -->
+		<dependency>
+			<groupId>com.blackberry.bdp.dwauth</groupId>
+			<artifactId>dwMsAdLdapAuth</artifactId>
+			<version>0.1.1</version>
 		</dependency>
 
 		<!-- kaboom -->
@@ -119,6 +106,44 @@
 	<build>
 		
 		<plugins>
+			
+			<!-- Generate a build number based off the commit hash -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.3</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<doCheck>false</doCheck>
+					<doUpdate>false</doUpdate>		
+				</configuration>	
+			</plugin>
+			
+			<!-- Insert the build branch and commit hash into the manifest -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
+						<manifestEntries>
+							<Build-Info>${buildNumber}</Build-Info>
+							<SCM-Branch>${scmBranch}</SCM-Branch>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+						
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
