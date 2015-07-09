@@ -5,16 +5,15 @@
  */
 package com.blackberry.bdp.kontroller.resources;
 
-import com.blackberry.bdp.kontroller.core.KafkaBrokers;
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.concurrent.atomic.AtomicLong;
 
 import com.blackberry.bdp.kaboom.api.KafkaBroker;
+import com.blackberry.bdp.kontroller.KontrollerConfiguration;
 
 import java.util.List;
 import org.apache.curator.framework.CuratorFramework;
@@ -25,19 +24,16 @@ import org.slf4j.LoggerFactory;
 public class KafkaBrokerResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KafkaBrokerResource.class);
-	private final AtomicLong counter;
+	private final KontrollerConfiguration config;
 	private final CuratorFramework curator;
-	private final String kafkaZkBrokerPath;
-
-	public KafkaBrokerResource(CuratorFramework curator, String kafkaZkBrokerPath) {
+	
+	public KafkaBrokerResource(CuratorFramework curator, KontrollerConfiguration config) {
 		this.curator = curator;
-		this.kafkaZkBrokerPath = kafkaZkBrokerPath;
-		this.counter = new AtomicLong();
+		this.config = config;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public KafkaBrokers getAll() throws Exception {
-		final List<KafkaBroker> clients = KafkaBroker.getAll(curator, kafkaZkBrokerPath);
-		return new KafkaBrokers(counter.incrementAndGet(), clients);
+	public List<KafkaBroker> getAll() throws Exception {
+		return KafkaBroker.getAll(curator, config.getKafkaZkBrokerPath());
 	}
 }

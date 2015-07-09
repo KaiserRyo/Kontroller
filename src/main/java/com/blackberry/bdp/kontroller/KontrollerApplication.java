@@ -14,6 +14,7 @@ import com.blackberry.bdp.dwauth.ldap.LdapAuthenticator;
 import com.blackberry.bdp.dwauth.ldap.LdapConnectionFactory;
 import com.blackberry.bdp.dwauth.ldap.User;
 import com.blackberry.bdp.dwauth.ldap.LdapConfiguration;
+import com.blackberry.bdp.kontroller.resources.AuthenticationStatusResource;
 import com.blackberry.bdp.kontroller.resources.KafkaTopicResource;
 import com.blackberry.bdp.kontroller.resources.KafkaBrokerResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomTopicResource;
@@ -73,12 +74,16 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		kaboomCurator = CuratorBuilder.build(config.getKaboomZkConnString(), true);
 		kafkaCurator = CuratorBuilder.build(config.getKafkaZkConnString(), true);
 
+		final AuthenticationStatusResource authResource;
+		authResource = new AuthenticationStatusResource(config);
+		environment.jersey().register(authResource);
+		
 		final KafkaBrokerResource kafkaBrokerResource;
-		kafkaBrokerResource = new KafkaBrokerResource(kafkaCurator, config.getKafkaZkBrokerPath());
+		kafkaBrokerResource = new KafkaBrokerResource(kafkaCurator, config);
 		environment.jersey().register(kafkaBrokerResource);
 
 		final KafkaTopicResource kafkaTopicResource;
-		kafkaTopicResource = new KafkaTopicResource(config.getKafkaSeedBrokers());
+		kafkaTopicResource = new KafkaTopicResource(config);
 		environment.jersey().register(kafkaTopicResource);
 
 		final KaBoomRunningConfigResource kaboomRunningConfigResource;		

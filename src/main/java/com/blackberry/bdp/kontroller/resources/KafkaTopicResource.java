@@ -15,26 +15,22 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 import com.blackberry.bdp.kaboom.api.KafkaTopic;
-import com.blackberry.bdp.kontroller.core.KafkaTopics;
+import com.blackberry.bdp.kontroller.KontrollerConfiguration;
 
 @Path("/kafka-topic") @Produces(MediaType.APPLICATION_JSON)
 public class KafkaTopicResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KafkaTopicResource.class);
-	private final AtomicLong counter;
-	private final String kafkaSeedBrokers;	
+	private final KontrollerConfiguration config;
 
-	public KafkaTopicResource(String kafkaSeedBrokers) {		
-		this.kafkaSeedBrokers = kafkaSeedBrokers;
-		this.counter = new AtomicLong();
+	public KafkaTopicResource(KontrollerConfiguration config) {		
+		this.config = config;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public KafkaTopics getAll() throws Exception {
-		final List<KafkaTopic> topics = KafkaTopic.getAll(kafkaSeedBrokers, "API");
-		return new KafkaTopics(counter.incrementAndGet(), topics);
+	public List<KafkaTopic> getAll() throws Exception {
+		return KafkaTopic.getAll(config.getKafkaSeedBrokers(), "API");
 	}
 }
