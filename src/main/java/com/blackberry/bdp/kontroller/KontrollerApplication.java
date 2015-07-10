@@ -14,6 +14,7 @@ import com.blackberry.bdp.dwauth.ldap.LdapAuthenticator;
 import com.blackberry.bdp.dwauth.ldap.LdapConnectionFactory;
 import com.blackberry.bdp.dwauth.ldap.User;
 import com.blackberry.bdp.dwauth.ldap.LdapConfiguration;
+import com.blackberry.bdp.dwauth.ldap.LdapHealthCheck;
 import com.blackberry.bdp.kontroller.resources.AuthenticationStatusResource;
 import com.blackberry.bdp.kontroller.resources.KafkaTopicResource;
 import com.blackberry.bdp.kontroller.resources.KafkaBrokerResource;
@@ -102,13 +103,14 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		kaboomClientResource = new KaBoomClientResource(kaboomCurator, config);
 		environment.jersey().register(kaboomClientResource);
 
-		// Health Checks
 		final CuratorHealthCheck kaboomZkHealthCheck = new CuratorHealthCheck(kaboomCurator);
-		final CuratorHealthCheck kafkaZkHealthCheck = new CuratorHealthCheck(kafkaCurator);		
-		//environment.healthChecks().register("ldap", new LdapHealthCheck<>(new ResourceAuthenticator(new LdapCanAuthenticate(ldapConfiguration))));
-		
 		environment.healthChecks().register("kaboomCurator", kaboomZkHealthCheck);
+		
+		final CuratorHealthCheck kafkaZkHealthCheck = new CuratorHealthCheck(kafkaCurator);		
 		environment.healthChecks().register("kafkaCurator", kafkaZkHealthCheck);
+
+		final LdapHealthCheck ldapHealthCheck = new LdapHealthCheck(ldapConnFactory);
+		environment.healthChecks().register("ldap", ldapHealthCheck);
 	}
 
 }
