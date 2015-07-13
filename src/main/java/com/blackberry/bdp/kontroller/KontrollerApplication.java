@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.blackberry.bdp.kontroller;
 
 import com.bazaarvoice.dropwizard.assets.ConfiguredAssetsBundle;
@@ -33,10 +28,6 @@ import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author dariens
- */
 public class KontrollerApplication extends Application<KontrollerConfiguration> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KontrollerApplication.class);
@@ -74,6 +65,8 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 
 		kaboomCurator = CuratorBuilder.build(config.getKaboomZkConnString(), true);
 		kafkaCurator = CuratorBuilder.build(config.getKafkaZkConnString(), true);
+		
+		// Public Resources
 
 		final AuthenticationStatusResource authResource;
 		authResource = new AuthenticationStatusResource(config);
@@ -103,6 +96,8 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		kaboomClientResource = new KaBoomClientResource(kaboomCurator, config);
 		environment.jersey().register(kaboomClientResource);
 
+		// Health Checks
+		
 		final CuratorHealthCheck kaboomZkHealthCheck = new CuratorHealthCheck(kaboomCurator);
 		environment.healthChecks().register("kaboomCurator", kaboomZkHealthCheck);
 		
@@ -112,5 +107,4 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		final LdapHealthCheck ldapHealthCheck = new LdapHealthCheck(ldapConnFactory);
 		environment.healthChecks().register("ldap", ldapHealthCheck);
 	}
-
 }
