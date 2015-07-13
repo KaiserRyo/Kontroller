@@ -61,22 +61,20 @@ public class KaBoomRunningConfigResource {
 	 * @return
 	 * @throws Exception
 	 */
-	@GET
-	@Timed
-	@Produces(value = MediaType.APPLICATION_JSON)
+	@GET @Timed @Produces(value = MediaType.APPLICATION_JSON)
 	public RunningConfig get(@Auth User user) throws Exception {
-		if (!user.getMemberships().contains(config.getAdminGroupDn())) {			
+		if (!user.getMemberships().contains(config.getAdminGroupDn())) {
 			LOG.error("User {} is not a member of group {}", user.getName(), config.getAdminGroupDn());
 			throw new AccessDeniedException();
 		}				
 		try {			
-			return RunningConfig.get(curator, config.getKaboomZkConfigPath());			
+			return RunningConfig.get(RunningConfig.class, curator, config.getKaboomZkConfigPath());
 		} catch (MissingConfigurationException mce) {
 			LOG.info("Missing configuration at {}, returning default {}", 
 				 config.getKaboomZkConfigPath(),
 				 RunningConfig.class);
 			return new RunningConfig();
-		}		
+		}
 	}
 
 	@POST

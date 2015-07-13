@@ -45,7 +45,7 @@ public class KaBoomTopicConfigResource {
 	 */
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
 	public List<KaBoomTopicConfig> getAll() throws Exception {
-		return KaBoomTopicConfig.getAll(curator, config.getKaboomZkTopicPath());
+		return KaBoomTopicConfig.getAll(KaBoomTopicConfig.class, curator, config.getKaboomZkTopicPath());
 	}
 	
 	@PUT @Path("{id}")
@@ -57,7 +57,7 @@ public class KaBoomTopicConfigResource {
 		// Note that we need to change the path to reflect the topic name
 		// which is the same as the ID.
 		topicConfig.setCurator(curator);
-		topicConfig.setZkPath(String.format("%s/%s", config.getKaboomZkTopicPath(), topicConfig.id));
+		topicConfig.setZkPath(String.format("%s/%s", config.getKaboomZkTopicPath(), topicConfig.getId()));
 		// save, updates the version, so just return it.
 		topicConfig.save();
 		return topicConfig;
