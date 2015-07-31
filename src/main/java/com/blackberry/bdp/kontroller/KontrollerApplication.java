@@ -57,10 +57,9 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		Authenticator<BasicCredentials, User> cachedAuthenticator = new CachingAuthenticator<>(
 			 environment.metrics(),
 			 ldapAuthenticator,
-			 config.getLdapConfiguration().getCachePolicy()
-		);
+			 config.getLdapConfiguration().getCachePolicy());
 
-		environment.jersey().register(AuthFactory.binder(new BasicAuthFactory<>(cachedAuthenticator, "realm", User.class)));
+		environment.jersey().register(AuthFactory.binder(new BasicAuthFactory<>(cachedAuthenticator, "Kontroller", User.class)));
 		environment.jersey().register(new AccessDeniedHandler());
 
 		kaboomCurator = CuratorBuilder.build(config.getKaboomZkConnString(), true);
