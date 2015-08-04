@@ -80,7 +80,11 @@ public class KaBoomRunningConfigResource {
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	public RunningConfig save(RunningConfig runningConfig) throws Exception {
+	public RunningConfig save(@Auth User user, RunningConfig runningConfig) throws Exception {
+		if (!user.getMemberships().contains(config.getAdminGroupDn())) {
+			LOG.error("User {} is not a member of group {}", user.getName(), config.getAdminGroupDn());
+			throw new AccessDeniedException();
+		}				
 		// Objects we get back in from our external API won't have 
 		// curator/zkPath set, so let's set them from our resource config
 		runningConfig.setCurator(curator);

@@ -15,6 +15,8 @@
  */
 package com.blackberry.bdp.kontroller.resources;
 
+import com.blackberry.bdp.dwauth.ldap.AccessDeniedException;
+import com.blackberry.bdp.dwauth.ldap.User;
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
@@ -24,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.blackberry.bdp.kaboom.api.KaBoomTopicConfig;
 import com.blackberry.bdp.kontroller.KontrollerConfiguration;
+import io.dropwizard.auth.Auth;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -60,7 +63,11 @@ public class KaBoomTopicConfigResource {
 	 * @throws Exception
 	 */
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public List<KaBoomTopicConfig> getAll() throws Exception {
+	public List<KaBoomTopicConfig> getAll(@Auth User user) throws Exception {
+		if (!user.getMemberships().contains(config.getAdminGroupDn())) {
+			LOG.error("User {} is not a member of group {}", user.getName(), config.getAdminGroupDn());
+			throw new AccessDeniedException();
+		}				
 		return KaBoomTopicConfig.getAll(KaBoomTopicConfig.class, curator, config.getKaboomZkTopicPath());
 	}
 
@@ -71,7 +78,11 @@ public class KaBoomTopicConfigResource {
 	 * @throws Exception
 	 */
 	@POST @Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public KaBoomTopicConfig create(KaBoomTopicConfig topicConfig) throws Exception {		
+	public KaBoomTopicConfig create(@Auth User user, KaBoomTopicConfig topicConfig) throws Exception {		
+		if (!user.getMemberships().contains(config.getAdminGroupDn())) {
+			LOG.error("User {} is not a member of group {}", user.getName(), config.getAdminGroupDn());
+			throw new AccessDeniedException();
+		}				
 		topicConfig.setCurator(curator);
 		topicConfig.setZkPath(String.format("%s/%s", config.getKaboomZkTopicPath(), topicConfig.getId()));
 		topicConfig.save();
@@ -87,7 +98,11 @@ public class KaBoomTopicConfigResource {
 	@PUT @Path("{id}")
 	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
 	@Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-	public KaBoomTopicConfig save(KaBoomTopicConfig topicConfig) throws Exception {
+	public KaBoomTopicConfig save(@Auth User user, KaBoomTopicConfig topicConfig) throws Exception {
+		if (!user.getMemberships().contains(config.getAdminGroupDn())) {
+			LOG.error("User {} is not a member of group {}", user.getName(), config.getAdminGroupDn());
+			throw new AccessDeniedException();
+		}				
 		topicConfig.setCurator(curator);
 		topicConfig.setZkPath(String.format("%s/%s", config.getKaboomZkTopicPath(), topicConfig.getId()));
 		topicConfig.save();
@@ -101,7 +116,11 @@ public class KaBoomTopicConfigResource {
 	 */
 	@DELETE @Path("{id}")
 	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})	
-	public void delete(@PathParam("id") String id) throws Exception {
+	public void delete(@Auth User user, @PathParam("id") String id) throws Exception {
+		if (!user.getMemberships().contains(config.getAdminGroupDn())) {
+			LOG.error("User {} is not a member of group {}", user.getName(), config.getAdminGroupDn());
+			throw new AccessDeniedException();
+		}				
 		String path = String.format("%s/%s", config.getKaboomZkTopicPath(), id);
 		KaBoomTopicConfig.delete(curator, path);
 		LOG.info("Deleted object at path {}", path);
