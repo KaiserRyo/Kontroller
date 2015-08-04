@@ -1,3 +1,7 @@
+Changes in 0.0.2
+
+- Requires authentication on all resource methods
+
 Changes in 0.0.1
 
 - Initial release
