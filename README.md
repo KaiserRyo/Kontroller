@@ -14,7 +14,6 @@ However there is built-in and recommended functionality for serving up static as
 
 ## Running
 
-```
 java -jar `[-Dlog4j.configuration=file:/path/to/log4j.properties]` `[-Ddw.logging.level=INFO]` `/path/to/kontroller-0.0.1.jar` server `/path/to/kontroller.yaml`
 
 The log4j config is purely optional, as is the log level.  The bare minimum to start the server is: 
@@ -32,7 +31,7 @@ Here's the sample configuration file.
 ```
 assets:
   overrides:
-    /: /root/kontroller/static/
+    /: /path/to/kontroller-UI/
 server:
   rootPath: /api/*
   gzip:
@@ -45,6 +44,7 @@ kaboomZkConfigPath: /kaboom/config #remember, this is relative to the root at th
 kafkaZkConnString: r3k1.kafka.company.com:2181,r3k2.kafka.company.com:2181,r3k3.kafka.company.com:2181
 kafkaSeedBrokers: r3k1.kafka.company.com:9092,r3k2.kafka.company.com:9092,r3k3.kafka.company.com:9092
 kafkaZkBrokerPath: /brokers/ids #again--remember, although BDP doesn't usually prefix kafka namespace
+adminGroupDn: CN=CommonName,OU=Hadoop,DC=ad0,DC=bblabs
 ldapConfiguration:
   ldapServers: ldap://ldap.company.com
   username: readonlyuser
@@ -56,6 +56,47 @@ ldapConfiguration:
   #connectTimeout: 500ms
   #readTimeout: 500ms
 ```
+
+## Bundling with Kontroller-UI
+
+Kontroller-UI is a feature rich web interface written against Kontroller's API.  It supports all the methods that Kontroller supports and while it's not strictly required, it is intended to be how Kontroller is accessed.  
+
+Simple fetch/download/checkout Kontroller-UI from Git and configure it's path where `/path/to/kontroller-UI/` occurs in the sample configuration.
+
+The entire API suite is then configured to be served from the `rootPath: /api/*` and the static configuraiton (i.e. Kontroller) is served from `/`.
+
+You'll need to then configure the appropriate ZK connection strings, and Kafka seed brokers accordingly (these should match your KaBoom configuration).
+
+## Securing via LDAP Auth.
+
+Here's a rundown of the LDAP configuration.
+
+## Configuration
+
+```
+ldapConfiguration:
+  ldapServers: ldap://ldap.company.com
+  username: accessuser
+  password: secret
+  userFilter: OU=department,DC=com,DC=company
+  groupBaseDN: OU=groups,DC=com,DC=company
+  trustAnySecuredHost: true
+  cachePolicy: maximumSize=10000, expireAfterWrite=10m
+  userIdentifierObjectName: sAMAccountName
+  merbershipIdentifierObjectName: member
+```
+Where:
+
+* ldapServers: A single or comma seperated list of your LDAP server (i.e. ldap[s]://host1:port1...[ldap[s]://hostN:portN]).  Port is optional and will be infered from the URI schema if ommited (ldap=389, ldaps=636).
+* username: The account that binds to the LDAP connection and is used for searching
+* password: The 'username's password
+* userFilter: The tree where the users are searched for by 'username' when looking for the principals DN
+* groupBaseDN: The tree where memberships are searched
+* trustAnySecuredHost: Accept non-valid SSL certificates for ldaps:// servers (self signed, expired)
+* cachePolicy: How many credentials to cache and for how long?
+* userIdentifierObjectName: Object name that identifies the username of a principal
+* merbershipIdentifierObjectName: Object name that identifies the object value being a member
+
 
 ## Accessing
 
