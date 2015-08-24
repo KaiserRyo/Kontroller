@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.blackberry.bdp.dwauth.ldap.User;
 import com.blackberry.bdp.dwauth.ldap.AccessDeniedException;
+import com.blackberry.bdp.kaboom.api.KaBoomTopicConfig;
 
 import com.blackberry.bdp.kaboom.api.RunningConfig;
 import com.blackberry.bdp.kontroller.KontrollerConfiguration;
@@ -34,7 +35,9 @@ import com.blackberry.bdp.kontroller.KontrollerConfiguration;
 import io.dropwizard.auth.Auth;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
+import javax.ws.rs.PathParam;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
@@ -70,7 +73,7 @@ public class KaBoomRunningConfigResource {
 		try {			
 			return RunningConfig.get(RunningConfig.class, curator, config.getKaboomZkConfigPath());
 		} catch (MissingConfigurationException mce) {
-			LOG.info("Missing configuration at {}, returning default {}", 
+			LOG.info("Missing configuration at {}, returning default {}",
 				 config.getKaboomZkConfigPath(),
 				 RunningConfig.class);
 			return new RunningConfig();
@@ -93,4 +96,19 @@ public class KaBoomRunningConfigResource {
 		runningConfig.save();
 		return runningConfig;
 	}
+	
+	/**
+	 * Deletes the KaBoomRunningConfig
+	 * @throws Exception
+	 */
+	@DELETE
+	@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})	
+	public void delete(@Auth User user) throws Exception {
+		if (!user.getMemberships().contains(config.getAdminGroupDn())) {
+			LOG.error("User {} is not a member of group {}", user.getName(), config.getAdminGroupDn());
+			throw new AccessDeniedException();
+		}						
+		RunningConfig.delete(curator, config.getKaboomZkConfigPath());
+		LOG.info("Deleted object at path {}", config.getKaboomZkConfigPath());
+	}	
 }

@@ -59,18 +59,32 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 		this.kaboomZkConfigPath = kaboomZkConfigPath;
 	}
 
-	// The path in kaboom's zk for where assignments are kept
+	// The path in kaboom's zk for where partition assignments are kept
 	@NotEmpty
-	private String kaboomZkAssignmentPath;
+	private String kaboomZkPartitionAssignmentPath;
 
 	@JsonProperty
-	public String getKaboomZkAssignmentPath() {
-		return kaboomZkAssignmentPath;
+	public String getKaboomZkPartitionAssignmentPath() {
+		return kaboomZkPartitionAssignmentPath;
 	}
 
 	@JsonProperty
-	public void setKaboomZkAssignmentPath(String kaboomZkAssignmentPath) {
-		this.kaboomZkAssignmentPath = kaboomZkAssignmentPath;
+	public void setKaboomZkPartitionAssignmentPath(String kaboomZkPartitionAssignmentPath) {
+		this.kaboomZkPartitionAssignmentPath = kaboomZkPartitionAssignmentPath;
+	}
+
+	// The path in kaboom's zk for where flag assignments are kept
+	@NotEmpty
+	private String kaboomZkFlagAssignmentPath;
+
+	@JsonProperty
+	public String getKaboomZkFlagAssignmentPath() {
+		return kaboomZkFlagAssignmentPath;
+	}
+
+	@JsonProperty
+	public void setKaboomZkFlagAssignmentPath(String kaboomZkFlagAssignmentPath) {
+		this.kaboomZkFlagAssignmentPath = kaboomZkFlagAssignmentPath;
 	}
 
 	// The path in kaboom's zk for where clients are kept

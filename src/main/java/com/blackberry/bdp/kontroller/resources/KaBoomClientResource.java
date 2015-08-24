@@ -35,6 +35,6 @@ public class KaBoomClientResource {
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
 	public List<KaBoomClient> getAll() throws Exception {
-		return KaBoomClient.getAll(curator, config.getKaboomZkClientPath());
+		return KaBoomClient.getAll(KaBoomClient.class, curator, config.getKaboomZkClientPath());
 	}
 }

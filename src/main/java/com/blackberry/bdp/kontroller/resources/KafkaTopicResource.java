@@ -5,6 +5,7 @@
  */
 package com.blackberry.bdp.kontroller.resources;
 
+import com.blackberry.bdp.kaboom.api.KafkaBroker;
 import com.codahale.metrics.annotation.Timed;
 
 import org.slf4j.Logger;
@@ -24,13 +25,15 @@ public class KafkaTopicResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KafkaTopicResource.class);
 	private final KontrollerConfiguration config;
+	private final List<KafkaBroker> kafkaBrokers;
 
-	public KafkaTopicResource(KontrollerConfiguration config) {		
+	public KafkaTopicResource(KontrollerConfiguration config, List<KafkaBroker> kafkaBrokers) {		
 		this.config = config;
+		this.kafkaBrokers = kafkaBrokers;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
 	public List<KafkaTopic> getAll() throws Exception {
-		return KafkaTopic.getAll(config.getKafkaSeedBrokers(), "API");
+		return KafkaTopic.getAll(config.getKafkaSeedBrokers(), "API", kafkaBrokers);
 	}
 }

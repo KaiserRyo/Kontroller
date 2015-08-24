@@ -10,6 +10,9 @@ import com.blackberry.bdp.dwauth.ldap.LdapConnectionFactory;
 import com.blackberry.bdp.dwauth.ldap.User;
 import com.blackberry.bdp.dwauth.ldap.LdapConfiguration;
 import com.blackberry.bdp.dwauth.ldap.LdapHealthCheck;
+import com.blackberry.bdp.kaboom.api.KaBoomClient;
+import com.blackberry.bdp.kaboom.api.KafkaBroker;
+import com.blackberry.bdp.kaboom.api.KafkaTopic;
 import com.blackberry.bdp.kontroller.resources.AuthenticationStatusResource;
 import com.blackberry.bdp.kontroller.resources.KafkaTopicResource;
 import com.blackberry.bdp.kontroller.resources.KafkaBrokerResource;
@@ -24,6 +27,7 @@ import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.CachingAuthenticator;
 import io.dropwizard.auth.basic.BasicAuthFactory;
 import io.dropwizard.auth.basic.BasicCredentials;
+import java.util.List;
 import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +37,9 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 	private static final Logger LOG = LoggerFactory.getLogger(KontrollerApplication.class);
 	private CuratorFramework kaboomCurator;
 	private CuratorFramework kafkaCurator;
+	private List<KafkaBroker> kafkaBrokers;
+	private List<KaBoomClient> kaboomClients;
+	private List<KafkaTopic> kafkaTopics;
 
 	public static void main(String[] args) throws Exception {
 		new KontrollerApplication().run(args);
@@ -63,7 +70,10 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		environment.jersey().register(new AccessDeniedHandler());
 
 		kaboomCurator = CuratorBuilder.build(config.getKaboomZkConnString(), true);
-		kafkaCurator = CuratorBuilder.build(config.getKafkaZkConnString(), true);
+		kafkaCurator = CuratorBuilder.build(config.getKafkaZkConnString(), true);		
+		kafkaBrokers = KafkaBroker.getAll(kafkaCurator, config.getKafkaZkBrokerPath());
+		kafkaTopics = KafkaTopic.getAll(config.getKafkaSeedBrokers(), "leaderLookup", kafkaBrokers);
+		kaboomClients = KaBoomClient.getAll(KaBoomClient.class, kaboomCurator, config.getKaboomZkClientPath());
 		
 		// Public Resources
 
@@ -76,7 +86,7 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		environment.jersey().register(kafkaBrokerResource);
 
 		final KafkaTopicResource kafkaTopicResource;
-		kafkaTopicResource = new KafkaTopicResource(config);
+		kafkaTopicResource = new KafkaTopicResource(config, kafkaBrokers);
 		environment.jersey().register(kafkaTopicResource);
 
 		final KaBoomRunningConfigResource kaboomRunningConfigResource;		
@@ -88,7 +98,7 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		environment.jersey().register(kaboomTopicConfigResource);
 
 		final KaBoomTopicResource kaboomTopicResource;
-		kaboomTopicResource = new KaBoomTopicResource(kaboomCurator, config);
+		kaboomTopicResource = new KaBoomTopicResource(kaboomCurator, config, kaboomClients, kafkaTopics);
 		environment.jersey().register(kaboomTopicResource);
 
 		final KaBoomClientResource kaboomClientResource;

@@ -1,3 +1,7 @@
+Changes in 0.0.3-SNAPSHOT
+
+- Adds support for deleting a KaBoom running configuration and reverting to the default
+
 Changes in 0.0.2
 
 - Requires authentication on all resource methods
