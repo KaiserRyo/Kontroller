@@ -47,7 +47,7 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 
 	@Override
 	public String getName() {
-		return "hello-world";
+		return "Kontroller v0.0.3-SNAPSHOT";
 	}
 
 	@Override
