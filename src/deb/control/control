@@ -1,0 +1,7 @@
+Package: [[name]]
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Maintainer: Dave Ariens <dariens@blackberry.com>
+Description: REST-ful API web services daemon for managing KaBoom

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Remove any libraries from previous versions
+
+if [[ "x$kontroller_uid" == "x" ]]
+then
+	getent group kontroller >/dev/null || groupadd -r kontroller 
+	getent passwd kontroller >/dev/null || useradd -r -g kontroller -m -s /bin/bash -c "User for kontroller." kontroller
+else
+	getent group kontroller >/dev/null || groupadd -g $kontroller_uid -r kontroller
+	getent passwd kontroller >/dev/null || useradd -u $kontroller_uid -r -g kontroller -m -s /bin/bash -c "User for kontroller." kontroller
+fi
+
+if [[ -e "/opt/kontroller/lib" ]]
+then
+	rm /opt/kontroller/lib/*
+	chown -R kontroller.kontroller /opt/kontroller/lib
+fi
+
+if [[ -e "/var/run/kontroller" ]]
+then
+	chown -R kontroller.kontroller /var/run/kontroller
+fi 
+
+if [[ -e "/var/log/kontroller" ]]
+then
+	chown -R kontroller.kontroller /var/log/kontroller
+fi 
+
+if [[ -e "/opt/kontroller/config" ]]
+then
+	chown -R kontroller.kontroller /opt/kontroller/config
+fi
