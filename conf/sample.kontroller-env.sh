@@ -32,4 +32,5 @@ JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=$JMXPORT"
 JAVA_OPTS="$JAVA_OPTS -Dlog4j.configuration=file:$LOG4JPROPERTIES"
 
 JAVA_OPTS="$JAVA_OPTS -Dkontroller.logs.dir=$LOGDIR"
-JAVA_OPTS="$JAVA_OPTS -Djava.library.path=$LIBDIR"
+
+CLASSPATH="$LIBDIR/*"

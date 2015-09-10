@@ -67,8 +67,7 @@ start() {
   /usr/bin/kdestroy 2>&1 | grep -v 'kdestroy: No credentials cache found while destroying cache'
   . $CONFIGDIR/kontroller-env.sh
 
-  #nohup $JAVA $JAVA_OPTS -classpath $CLASSPATH com.blackberry.bdp.kontroller.kontroller $CONFIGDIR/kontroller.properties >$LOGDIR/server.out 2>&1 &
-  nohup $JAVA $JAVA_OPTS -jar $EXECUTABLE_JAR server $CONFIG_FILE >$LOGDIR/server.out-`date +"%Y-%m-%d-%M-%S"`
+  nohup $JAVA $JAVA_OPTS -cp "$CLASSPATH"  com.blackberry.bdp.kontroller.KontrollerApplication server $CONFIG_FILE >$LOGDIR/server.out-`date +"%Y-%m-%d-%H-%M-%S"`
 
   RETVAL=$?
   PID=$!

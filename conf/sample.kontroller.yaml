@@ -1,3 +1,10 @@
+logging:
+  level: INFO
+  appenders:
+    - type: file
+      threshold: INFO
+      currentLogFilename: /var/log/kontroller/server.log
+      archivedLogFilenamePattern: /var/log/kontroller/server.log-%d{yyyy-MM-dd-hh}.log.gz
 assets:
   overrides:
     /: /root/kontroller/static/
