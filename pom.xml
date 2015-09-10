@@ -332,6 +332,7 @@
 									<paths>
 										<path>${project.basedir}/conf/sample.kontroller-env.sh</path>
 										<path>${project.basedir}/conf/sample.kontroller.yaml</path>
+										<path>${project.basedir}/conf/sample.log4j.properties</path>
 									</paths>
 									<dst>/opt/kontroller/config</dst>
 								</data>
