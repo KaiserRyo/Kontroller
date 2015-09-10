@@ -187,6 +187,7 @@
 				<!-- When to build -->
 				<executions>
 					<execution>
+						<phase>install</phase>
 						<goals>
 							<goal>rpm</goal>
 						</goals>
@@ -214,8 +215,15 @@
 						<!-- Libraries -->
 						<mapping>
 							<directory>/opt/kontroller/lib</directory>
-							<artifact></artifact>
-							<dependency/>
+							<artifact/>
+							<sources>
+								<source>
+									<location>${project.build.directory}/lib</location>
+									<includes>
+										<include>*</include>
+									</includes>
+								</source>
+							</sources>
 						</mapping>
 
 						<!-- Config -->
