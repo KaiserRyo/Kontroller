@@ -61,13 +61,10 @@ start() {
   fi
 
   echo -n $"Starting $PROG: "
-  # kdestroy first to ensure that we're not logged in as anyone else.
-  # Shouldn't be, if this is a dedicated user.
-  # Also, ignore the message we get when the crentials cache is empty.
-  /usr/bin/kdestroy 2>&1 | grep -v 'kdestroy: No credentials cache found while destroying cache'
+
   . $CONFIGDIR/kontroller-env.sh
 
-  nohup $JAVA $JAVA_OPTS -cp "$CLASSPATH"  com.blackberry.bdp.kontroller.KontrollerApplication server $CONFIG_FILE >$LOGDIR/server.out-`date +"%Y-%m-%d-%H-%M-%S"`
+  nohup $JAVA $JAVA_OPTS -cp "$CLASSPATH"  com.blackberry.bdp.kontroller.KontrollerApplication server $CONFIG_FILE >$LOGDIR/server.out-`date +"%Y-%m-%d-%H-%M-%S"` & 
 
   RETVAL=$?
   PID=$!
