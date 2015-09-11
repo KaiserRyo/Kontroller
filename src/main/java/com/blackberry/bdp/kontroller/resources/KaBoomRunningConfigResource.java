@@ -27,7 +27,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.blackberry.bdp.dwauth.ldap.User;
 import com.blackberry.bdp.dwauth.ldap.AccessDeniedException;
-import com.blackberry.bdp.kaboom.api.KaBoomTopicConfig;
 import com.blackberry.bdp.kaboom.api.RunningConfig;
 import com.blackberry.bdp.kontroller.KontrollerConfiguration;
 
