@@ -215,8 +215,14 @@
 						<!-- Libraries -->
 						<mapping>
 							<directory>/opt/kontroller/lib</directory>
-							<artifact/>
+							<!--<artifact/> Why does this pull in a logging artifact?-->
 							<sources>
+								<source>
+									<location>${project.build.directory}</location>
+									<includes>
+										<include>${project.build.finalName}.jar</include>
+									</includes>
+								</source>
 								<source>
 									<location>${project.build.directory}/lib</location>
 									<includes>
@@ -241,8 +247,8 @@
 
 						<!-- Executables -->
 						<mapping>
-							<directory>/opt/kontroller/bin</directory>
-							<filemode>744</filemode>
+							<directory>/etc/rc.d/init.d</directory>
+							<filemode>755</filemode>
 							<sources>
 								<source>
 									<location>${project.basedir}/bin</location>
