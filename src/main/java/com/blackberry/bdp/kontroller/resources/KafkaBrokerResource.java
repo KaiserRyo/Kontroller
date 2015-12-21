@@ -12,11 +12,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.blackberry.bdp.kaboom.api.KafkaBroker;
-import com.blackberry.bdp.kontroller.KontrollerConfiguration;
+import com.blackberry.bdp.krackle.meta.Broker;
 
-import java.util.List;
-import org.apache.curator.framework.CuratorFramework;
+import com.blackberry.bdp.krackle.meta.MetaData;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,16 +23,14 @@ import org.slf4j.LoggerFactory;
 public class KafkaBrokerResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KafkaBrokerResource.class);
-	private final KontrollerConfiguration config;
-	private final CuratorFramework curator;
-	
-	public KafkaBrokerResource(CuratorFramework curator, KontrollerConfiguration config) {
-		this.curator = curator;
-		this.config = config;
+	private final MetaData kafkaMetaData;
+
+	public KafkaBrokerResource(MetaData kafkaMetaData) {
+		this.kafkaMetaData = kafkaMetaData;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public List<KafkaBroker> getAll() throws Exception {
-		return KafkaBroker.getAll(curator, config.getKafkaZkBrokerPath());
+	public Map<Integer, Broker> getAll() throws Exception {
+		return kafkaMetaData.getBrokers();
 	}
 }
