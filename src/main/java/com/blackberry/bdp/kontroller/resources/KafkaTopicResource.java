@@ -17,7 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.blackberry.bdp.krackle.meta.MetaData;
 import com.blackberry.bdp.krackle.meta.Topic;
-import java.util.Map;
+import java.util.Collection;
 
 @Path("/kafka-topic") @Produces(MediaType.APPLICATION_JSON)
 public class KafkaTopicResource {
@@ -30,7 +30,7 @@ public class KafkaTopicResource {
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public Map<String, Topic> getAll() throws Exception {
-		return kafkaMetaData.getTopics();
+	public Collection<Topic> getAll() throws Exception {
+		return kafkaMetaData.getTopics().values();
 	}
 }

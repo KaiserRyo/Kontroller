@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 import com.blackberry.bdp.krackle.meta.Broker;
 
 import com.blackberry.bdp.krackle.meta.MetaData;
-import java.util.Map;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public class KafkaBrokerResource {
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public Map<Integer, Broker> getAll() throws Exception {
-		return kafkaMetaData.getBrokers();
+	public Collection<Broker> getAll() throws Exception {
+		return kafkaMetaData.getBrokers().values();
 	}
 }
