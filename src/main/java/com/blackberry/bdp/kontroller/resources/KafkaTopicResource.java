@@ -5,6 +5,7 @@
  */
 package com.blackberry.bdp.kontroller.resources;
 
+import com.blackberry.bdp.kontroller.core.MetaDataCache;
 import com.codahale.metrics.annotation.Timed;
 
 import org.slf4j.Logger;
@@ -15,7 +16,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.blackberry.bdp.krackle.meta.MetaData;
 import com.blackberry.bdp.krackle.meta.Topic;
 import java.util.Collection;
 
@@ -23,14 +23,14 @@ import java.util.Collection;
 public class KafkaTopicResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KafkaTopicResource.class);
-	private final MetaData kafkaMetaData;
+	private final MetaDataCache kafkaMetaDataCache;
 
-	public KafkaTopicResource(MetaData kafkaMetaData) {
-		this.kafkaMetaData = kafkaMetaData;
+	public KafkaTopicResource(MetaDataCache kafkaMetaDataCache) {
+		this.kafkaMetaDataCache = kafkaMetaDataCache;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
 	public Collection<Topic> getAll() throws Exception {
-		return kafkaMetaData.getTopics().values();
+		return kafkaMetaDataCache.getMetaData().getTopics().values();
 	}
 }

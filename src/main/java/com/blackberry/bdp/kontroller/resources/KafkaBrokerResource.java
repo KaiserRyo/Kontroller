@@ -5,6 +5,7 @@
  */
 package com.blackberry.bdp.kontroller.resources;
 
+import com.blackberry.bdp.kontroller.core.MetaDataCache;
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
@@ -14,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.blackberry.bdp.krackle.meta.Broker;
 
-import com.blackberry.bdp.krackle.meta.MetaData;
 import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +23,14 @@ import org.slf4j.LoggerFactory;
 public class KafkaBrokerResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KafkaBrokerResource.class);
-	private final MetaData kafkaMetaData;
+	private final MetaDataCache kafkaMetaDataCache;
 
-	public KafkaBrokerResource(MetaData kafkaMetaData) {
-		this.kafkaMetaData = kafkaMetaData;
+	public KafkaBrokerResource(MetaDataCache kafkaMetaDataCache) {
+		this.kafkaMetaDataCache = kafkaMetaDataCache;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
 	public Collection<Broker> getAll() throws Exception {
-		return kafkaMetaData.getBrokers().values();
+		return kafkaMetaDataCache.getMetaData().getBrokers().values();
 	}
 }

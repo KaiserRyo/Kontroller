@@ -11,6 +11,7 @@ import com.blackberry.bdp.dwauth.ldap.User;
 import com.blackberry.bdp.dwauth.ldap.LdapConfiguration;
 import com.blackberry.bdp.dwauth.ldap.LdapHealthCheck;
 import com.blackberry.bdp.kaboom.api.KaBoomClient;
+import com.blackberry.bdp.kontroller.core.MetaDataCache;
 import com.blackberry.bdp.kontroller.resources.AuthenticationStatusResource;
 import com.blackberry.bdp.kontroller.resources.KafkaTopicResource;
 import com.blackberry.bdp.kontroller.resources.KafkaBrokerResource;
@@ -19,7 +20,6 @@ import com.blackberry.bdp.kontroller.resources.KaBoomRunningConfigResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomTopicConfigResource;
 import com.blackberry.bdp.kontroller.resources.KaBoomClientResource;
 import com.blackberry.bdp.kontroller.health.CuratorHealthCheck;
-import com.blackberry.bdp.krackle.auth.AuthenticatedSocketBuilder;
 import com.blackberry.bdp.krackle.meta.MetaData;
 import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.auth.AuthenticationException;
@@ -27,10 +27,7 @@ import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.CachingAuthenticator;
 import io.dropwizard.auth.basic.BasicAuthFactory;
 import io.dropwizard.auth.basic.BasicCredentials;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import javax.security.auth.login.LoginContext;
 import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +36,7 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 
 	private static final Logger LOG = LoggerFactory.getLogger(KontrollerApplication.class);
 	private CuratorFramework kaboomCurator;
-	private MetaData kafkaMetaData;
+	private MetaDataCache metaDataCache;
 	private List<KaBoomClient> kaboomClients;
 
 	public static void main(String[] args) throws Exception {
@@ -70,35 +67,8 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		environment.jersey().register(AuthFactory.binder(new BasicAuthFactory<>(cachedAuthenticator, "Kontroller", User.class)));
 		environment.jersey().register(new AccessDeniedHandler());
 
-		AuthenticatedSocketBuilder sockBuilder = null;
-
-		switch (config.getKafkaSecurityProtocol()) {
-			case "SASL_PLAINTEXT": {
-				LoginContext lc = new LoginContext(config.getJaasLoginContextName());
-				lc.login();
-				LOG.info("logged into security context: {}", config.getJaasLoginContextName());
-				Map<String, Object> securityConfigs = new HashMap<>();
-				securityConfigs.put("subject", lc.getSubject());
-				securityConfigs.put("servicePrincipal", config.getKafkaServicePrincipal());
-				sockBuilder = new AuthenticatedSocketBuilder(config.getKafkaSecurityProtocol(),
-					 securityConfigs);
-				break;
-			}
-			default:
-				throw new SecurityException(String.format(
-					 "security protocol %s is not recognized", config.getKafkaSecurityProtocol()));
-		}
-
-		if (sockBuilder == null) {
-			throw new Exception("unable to configure a valid authenticated socket builder");
-		}
-
+		metaDataCache = new MetaDataCache(config);
 		kaboomCurator = CuratorBuilder.build(config.getKaboomZkConnString(), true);
-
-		kafkaMetaData = MetaData.getMetaData(sockBuilder,
-			 config.getKafkaSeedBrokers(),
-			 "kontroller");
-
 		kaboomClients = KaBoomClient.getAll(KaBoomClient.class,
 			 kaboomCurator,
 			 config.getKaboomZkClientPath());
@@ -109,11 +79,11 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		environment.jersey().register(authResource);
 
 		final KafkaBrokerResource kafkaBrokerResource;
-		kafkaBrokerResource = new KafkaBrokerResource(kafkaMetaData);
+		kafkaBrokerResource = new KafkaBrokerResource(metaDataCache);
 		environment.jersey().register(kafkaBrokerResource);
 
 		final KafkaTopicResource kafkaTopicResource;
-		kafkaTopicResource = new KafkaTopicResource(kafkaMetaData);
+		kafkaTopicResource = new KafkaTopicResource(metaDataCache);
 		environment.jersey().register(kafkaTopicResource);
 
 		final KaBoomRunningConfigResource kaboomRunningConfigResource;
@@ -132,7 +102,7 @@ public class KontrollerApplication extends Application<KontrollerConfiguration> 
 		kaboomTopicResource = new KaBoomTopicResource(kaboomCurator,
 			 config,
 			 kaboomClients,
-			 kafkaMetaData);
+			 metaDataCache);
 		environment.jersey().register(kaboomTopicResource);
 
 		final KaBoomClientResource kaboomClientResource;

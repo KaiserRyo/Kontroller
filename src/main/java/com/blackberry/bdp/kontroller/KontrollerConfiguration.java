@@ -15,10 +15,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
-/**
- *
- * @author dariens
- */
 public class KontrollerConfiguration extends Configuration implements AssetsBundleConfiguration {
 
 	@Valid
@@ -29,6 +25,20 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 	@Override
 	public AssetsConfiguration getAssetsConfiguration() {
 		return assets;
+	}
+
+	// How long to cache metadata for
+	//@NotEmpty
+	protected Integer metaDataCacheTtlSec;
+
+	@JsonProperty
+	public Integer getMetaDataCacheTtlSec() {
+		return metaDataCacheTtlSec;
+	}
+
+	@JsonProperty
+	public void setMetaDataCacheTtlSec(Integer metaDataCacheTtlSec) {
+		this.metaDataCacheTtlSec = metaDataCacheTtlSec;
 	}
 
 	// The Kafka Security Protocol
@@ -195,4 +205,5 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 	public void setAdminGroupDn(String adminGroupDn) {
 		this.adminGroupDn = adminGroupDn;
 	}
+
 }
