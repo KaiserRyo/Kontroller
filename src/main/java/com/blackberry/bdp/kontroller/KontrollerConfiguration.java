@@ -15,10 +15,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
-/**
- *
- * @author dariens
- */
 public class KontrollerConfiguration extends Configuration implements AssetsBundleConfiguration {
 
 	@Valid
@@ -31,18 +27,60 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 		return assets;
 	}
 
-	// The path in kafka's zk for where brokers are kept
-	@NotEmpty
-	private String kafkaZkBrokerPath;
+	// How long to cache metadata for
+	//@NotEmpty
+	protected Integer metaDataCacheTtlSec;
 
 	@JsonProperty
-	public String getKafkaZkBrokerPath() {
-		return kafkaZkBrokerPath;
+	public Integer getMetaDataCacheTtlSec() {
+		return metaDataCacheTtlSec;
 	}
 
 	@JsonProperty
-	public void setKafkaZkBrokerPath(String kafkaZkBrokerPath) {
-		this.kafkaZkBrokerPath = kafkaZkBrokerPath;
+	public void setMetaDataCacheTtlSec(Integer metaDataCacheTtlSec) {
+		this.metaDataCacheTtlSec = metaDataCacheTtlSec;
+	}
+
+	// The Kafka Security Protocol
+	@NotEmpty
+	private String kafkaSecurityProtocol;
+
+	@JsonProperty
+	public String getKafkaSecurityProtocol() {
+		return kafkaSecurityProtocol;
+	}
+
+	@JsonProperty
+	public void setKafkaSecurityProtocol(String kafkaSecurityProtocol) {
+		this.kafkaSecurityProtocol = kafkaSecurityProtocol;
+	}
+
+	// The Kafka Service Principal
+	@NotEmpty
+	private String kafkaServicePrincipal;
+
+	@JsonProperty
+	public String getKafkaServicePrincipal() {
+		return kafkaServicePrincipal;
+	}
+
+	@JsonProperty
+	public void setKafkaServicePrincipal(String kafkaServicePrincipall) {
+		this.kafkaServicePrincipal = kafkaServicePrincipall;
+	}
+
+	// The JAAS Login Context Name
+	@NotEmpty
+	private String jaasLoginContextName;
+
+	@JsonProperty
+	public String getJaasLoginContextName() {
+		return jaasLoginContextName;
+	}
+
+	@JsonProperty
+	public void setJaasLoginContextName(String jaasLoginContextName) {
+		this.jaasLoginContextName = jaasLoginContextName;
 	}
 
 	// The path in kaboom's zk for where the RunningConfiguration is kept
@@ -143,30 +181,13 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 		this.kafkaSeedBrokers = kafkaSeedBrokers;
 	}
 
-	// The connection string for kafka's curator instance
-	@NotEmpty
-	private String kafkaZkConnString;
-
-	@JsonProperty
-	public String getKafkaZkConnString() {
-		return kafkaZkConnString;
-	}
-
-	@JsonProperty
-	public void setKafkaZkConnString(String kafkaZkConnString) {
-		this.kafkaZkConnString = kafkaZkConnString;
-	}
-
 	// The LdapConfiguration for Authentication/Authorization
-	//@NotEmpty
 	private LdapConfiguration ldapConfiguration;
 
-	//@JsonProperty
 	public LdapConfiguration getLdapConfiguration() {
 		return ldapConfiguration;
 	}
 
-	//@JsonProperty
 	public void setLdapConfiguration(LdapConfiguration ldapConfiguration) {
 		this.ldapConfiguration = ldapConfiguration;
 	}
@@ -184,4 +205,5 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 	public void setAdminGroupDn(String adminGroupDn) {
 		this.adminGroupDn = adminGroupDn;
 	}
+
 }

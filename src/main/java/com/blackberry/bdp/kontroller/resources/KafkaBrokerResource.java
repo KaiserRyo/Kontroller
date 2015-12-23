@@ -5,6 +5,7 @@
  */
 package com.blackberry.bdp.kontroller.resources;
 
+import com.blackberry.bdp.kontroller.core.MetaDataCache;
 import com.codahale.metrics.annotation.Timed;
 
 import javax.ws.rs.GET;
@@ -12,11 +13,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.blackberry.bdp.kaboom.api.KafkaBroker;
-import com.blackberry.bdp.kontroller.KontrollerConfiguration;
+import com.blackberry.bdp.krackle.meta.Broker;
 
-import java.util.List;
-import org.apache.curator.framework.CuratorFramework;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,16 +23,14 @@ import org.slf4j.LoggerFactory;
 public class KafkaBrokerResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(KafkaBrokerResource.class);
-	private final KontrollerConfiguration config;
-	private final CuratorFramework curator;
-	
-	public KafkaBrokerResource(CuratorFramework curator, KontrollerConfiguration config) {
-		this.curator = curator;
-		this.config = config;
+	private final MetaDataCache kafkaMetaDataCache;
+
+	public KafkaBrokerResource(MetaDataCache kafkaMetaDataCache) {
+		this.kafkaMetaDataCache = kafkaMetaDataCache;
 	}
 
 	@GET 	@Timed @Produces(value = MediaType.APPLICATION_JSON)
-	public List<KafkaBroker> getAll() throws Exception {
-		return KafkaBroker.getAll(curator, config.getKafkaZkBrokerPath());
+	public Collection<Broker> getAll() throws Exception {
+		return kafkaMetaDataCache.getMetaData().getBrokers().values();
 	}
 }
