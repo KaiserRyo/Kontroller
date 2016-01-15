@@ -17,11 +17,12 @@ package com.blackberry.bdp.kontroller.core;
 
 import com.blackberry.bdp.kontroller.KontrollerConfiguration;
 import com.blackberry.bdp.krackle.auth.AuthenticatedSocketBuilder;
-import com.blackberry.bdp.krackle.auth.AuthenticationException;
+import com.blackberry.bdp.krackle.exceptions.AuthenticationException;
+import com.blackberry.bdp.krackle.jaas.Login;
+import com.blackberry.bdp.krackle.jaas.Login.ClientCallbackHandler;
 import com.blackberry.bdp.krackle.meta.MetaData;
 import java.util.HashMap;
 import java.util.Map;
-import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +45,10 @@ public class MetaDataCache {
 
 		switch (kafkaSecurityProtocol) {
 			case SASL_PLAINTEXT: {
-				LoginContext lc = new LoginContext(config.getJaasLoginContextName());
-				lc.login();
+				Login jaasLogin = new Login(config.getJaasLoginContextName(), new ClientCallbackHandler());
 				LOG.info("logged into security context: {}", config.getJaasLoginContextName());
 				Map<String, Object> securityConfigs = new HashMap<>();
-				securityConfigs.put("subject", lc.getSubject());
+				securityConfigs.put("subject", jaasLogin.getSubject());
 				securityConfigs.put("servicePrincipal", config.getKafkaServicePrincipal());
 				sockBuilder = new AuthenticatedSocketBuilder(kafkaSecurityProtocol, securityConfigs);
 				break;
