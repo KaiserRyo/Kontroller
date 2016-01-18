@@ -50,6 +50,7 @@ public class MetaDataCache {
 				Map<String, Object> securityConfigs = new HashMap<>();
 				securityConfigs.put("subject", jaasLogin.getSubject());
 				securityConfigs.put("servicePrincipal", config.getKafkaServicePrincipal());
+				securityConfigs.put("clientPrincipal", jaasLogin.getPrincipal());
 				sockBuilder = new AuthenticatedSocketBuilder(kafkaSecurityProtocol, securityConfigs);
 				break;
 			}
