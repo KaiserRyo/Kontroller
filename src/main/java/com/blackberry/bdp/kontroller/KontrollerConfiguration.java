@@ -29,7 +29,7 @@ public class KontrollerConfiguration extends Configuration implements AssetsBund
 
 	// How long to cache metadata for
 	//@NotEmpty
-	protected Integer metaDataCacheTtlSec;
+	protected Integer metaDataCacheTtlSec = 30;
 
 	@JsonProperty
 	public Integer getMetaDataCacheTtlSec() {
