@@ -4,7 +4,7 @@
 	<name>kontroller-0.9.0</name>
 	<groupId>com.blackberry.bdp.kontroller</groupId>
 	<artifactId>kontroller</artifactId>
-	<version>0.9.0-SNAPSHOT</version>
+	<version>0.9.0</version>
 	<packaging>jar</packaging>
 
 	<scm>
@@ -24,14 +24,14 @@
 		<dependency>
 			<groupId>com.blackberry.bdp.kaboom</groupId>
 			<artifactId>kaboom-api</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>0.9.0</version>
 		</dependency>
 
 		<!-- KaBoom -->
 		<dependency>
 			<groupId>com.blackberry.bdp.krackle</groupId>
 			<artifactId>krackle</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>0.9.0</version>
 		</dependency>
 
 		<!-- Curator Framework -->
@@ -72,7 +72,7 @@
 		<dependency>
 			<groupId>com.blackberry.bdp.dwauth</groupId>
 			<artifactId>dwMsAdLdapAuth</artifactId>
-			<version>0.1.3-SNAPSHOT</version>
+			<version>0.1.3</version>
 		</dependency>
 
 		<dependency>
